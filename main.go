@@ -6,18 +6,29 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
 func main() {
 	port := flag.Int("port", 1234, "port to listen")
 	maxSleep := flag.Int("max-rand", 120, "max second to sleep")
+	homePage := flag.String("home", "https://github.com/cloverstd/sleep", "root to redirect")
 	flag.Parse()
+	if _, err := url.Parse(*homePage); err != nil {
+		log.Fatalf("invalid home page: %s", *homePage)
+	}
 
 	rand.Seed(time.Now().Unix())
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		accept := r.Header.Get("Accept")
+		if strings.Contains(accept, "text/html") {
+			http.Redirect(w, r, *homePage, http.StatusMovedPermanently)
+			return
+		}
 		var second int
 		var err error
 		if second, err = strconv.Atoi(r.URL.Path[1:]); err != nil {

@@ -2,7 +2,7 @@
 
 ## Usage
 
-You can send a request to [http://sleep.hui.lu](http://hui.lu), and Sleep server will wait a moment to response.
+You can send a request to [http://sleep.hui.lu](http://sleep.hui.lu), and Sleep server will wait a moment to response.
 
 
 ### Rand

@@ -48,9 +48,18 @@ func main() {
 			fmt.Fprintf(w, "bad sleep time. sleep time should between in (1, %d)", *maxSleep)
 			return
 		}
-		time.Sleep(time.Duration(second) * time.Second)
-		w.Header().Set("X-Sleep", fmt.Sprint(second))
-		fmt.Fprintf(w, "I sleep %ds.", second)
+		notify := w.(http.CloseNotifier).CloseNotify()
+		t := time.NewTimer(time.Duration(second) * time.Second)
+		defer t.Stop()
+		select {
+		case <-t.C:
+			w.Header().Set("X-Sleep", fmt.Sprint(second))
+			fmt.Fprintf(w, "I sleep %ds.", second)
+			return
+		case <-notify:
+			log.Printf("Close by client <%s>", r.RemoteAddr)
+			return
+		}
 	})
 
 	log.Printf("Sleep server is running on :%d", *port)
